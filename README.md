@@ -22,17 +22,17 @@ cd atharvadeo101-safety-checking-usingyolo
 
 ### 2. Running the Application
 #### Start the Backend
-From the backend/ directory:
+From the backend/ directory:\n
 python app.py
-/n
+\n
 #### Start the Frontend
-From the frontend/ directory (in a separate terminal):
+From the frontend/ directory (in a separate terminal):\n
 npm run dev
-/n
+\n
 ### Access the App
-Open your browser and navigate to http://localhost:3000.
+Open your browser and navigate to http://localhost:3000.\n
 Click "Start Camera" to begin the video feed with safety equipment detection.
-/n
+\n
 ### Usage
 - Start Camera: Initiates the webcam feed and starts detecting safety gear.
 - Stop Camera: Stops the feed and releases the camera.
