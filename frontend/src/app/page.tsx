@@ -1,15 +1,40 @@
 "use client"
 
-import { useState } from "react"
-import SafetyDetection from "@/components/safety-detection"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Camera, Info } from "lucide-react"
 
 export default function Home() {
   const [isRunning, setIsRunning] = useState(false)
-  // Fixed confidence threshold since settings section is removed
-  const confidenceThreshold = 0.5
+
+  const startCamera = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/start_camera', {
+        method: 'POST',
+      })
+      const result = await response.json()
+      if (result.status === "Camera started") {
+        setIsRunning(true)
+      }
+    } catch (error) {
+      console.error("Error starting camera:", error)
+    }
+  }
+
+  const stopCamera = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/stop_camera', {
+        method: 'POST',
+      })
+      const result = await response.json()
+      if (result.status === "Camera stopped") {
+        setIsRunning(false)
+      }
+    } catch (error) {
+      console.error("Error stopping camera:", error)
+    }
+  }
 
   return (
     <div className="container mx-auto py-6">
@@ -26,7 +51,11 @@ export default function Home() {
             <div className="flex flex-col space-y-4">
               <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden">
                 {isRunning ? (
-                  <SafetyDetection confidenceThreshold={confidenceThreshold} />
+                  <img
+                    src="http://localhost:5000/video_feed"
+                    alt="Video feed"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="flex flex-col items-center space-y-4">
@@ -39,7 +68,7 @@ export default function Home() {
               <div className="flex justify-center">
                 <Button
                   size="lg"
-                  onClick={() => setIsRunning(!isRunning)}
+                  onClick={isRunning ? stopCamera : startCamera}
                   variant={isRunning ? "destructive" : "default"}
                 >
                   {isRunning ? "Stop Camera" : "Start Camera"}
@@ -77,4 +106,3 @@ export default function Home() {
     </div>
   )
 }
-
