@@ -49,15 +49,15 @@ This project implements a real-time safety equipment detection system using the 
 git clone https://github.com/yourusername/atharvadeo101-safety-checking-usingyolo.git
 cd atharvadeo101-safety-checking-usingyolo
 
-###2. Running the Application
-Start the Backend
+### 2. Running the Application
+#### Start the Backend
 From the backend/ directory:
 python app.py
-
-Start the Frontend
+/n
+#### Start the Frontend
 From the frontend/ directory (in a separate terminal):
 npm run dev
-
-###Access the App
+/n
+### Access the App
 Open your browser and navigate to http://localhost:3000.
 Click "Start Camera" to begin the video feed with safety equipment detection.
