@@ -7,35 +7,6 @@ This project implements a real-time safety equipment detection system using the 
 - **Web Interface**: A Next.js-based UI to start/stop the camera and view the video feed with detection overlays.
 - **Safety Violation Alerts**: Highlights missing safety gear (e.g., "NO-Hardhat") in red and present gear in green.
 
-## Directory Structure
-├── backend/                    
-│   ├── app.py                  
-│   ├── requirements.txt        
-│   ├── best.pt                 
-│   └── yolov8n.pt              
-├── frontend/                   
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── globals.css
-│   │   │   ├── layout.tsx
-│   │   │   └── page.tsx
-│   │   ├── components/
-│   │   │   ├── theme-provider.tsx
-│   │   │   └── ui/
-│   │   │       ├── alert.tsx
-│   │   │       ├── badge.tsx
-│   │   │       ├── button.tsx
-│   │   │       └── card.tsx
-│   │   └── lib/
-│   │       └── utils.ts
-│   ├── next.config.mjs
-│   ├── package.json
-│   ├── postcss.config.js
-│   ├── tailwind.config.ts
-│   └── tsconfig.json
-├── Train-Model.ipynb           
-└── README.md
-
 
 ## Prerequisites
 - **Python 3.8+**: For the Flask backend.
@@ -61,3 +32,11 @@ npm run dev
 ### Access the App
 Open your browser and navigate to http://localhost:3000.
 Click "Start Camera" to begin the video feed with safety equipment detection.
+/n
+### Usage
+- Start Camera: Initiates the webcam feed and starts detecting safety gear.
+- Stop Camera: Stops the feed and releases the camera.
+
+### Detection Legend:
+- **Green:** Safety equipment present (e.g., Hardhat, Safety Vest).
+- **Red:** Safety equipment missing (e.g., NO-Hardhat, NO-Mask).
