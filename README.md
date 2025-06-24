@@ -21,7 +21,7 @@ Ensuring worker safety is crucial at construction sites. This application automa
 
 <ul>Option to analyze uploaded video or live stream</ul>
 
-##📦 Tech Stack
+<h2>📦 Tech Stack</h2>
 <ul>YOLOv5/YOLOv8 (custom-trained or pre-trained weights)</ul>
 
 <ul>OpenCV for video processing</ul>
