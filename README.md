@@ -11,10 +11,10 @@ This project uses YOLO (You Only Look Once) object detection with OpenCV to moni
 
 A Streamlit-based web interface allows users to upload video files or stream video feeds and view real-time detections.
 
-##🚧 Use Case
+<h2>🚧 Use Case</h2>
 Ensuring worker safety is crucial at construction sites. This application automates the process of verifying compliance with safety protocols, helping supervisors monitor gear usage and reduce the risk of accidents.
 
-##💡 Features
+<h2>💡 Features</h2>
 <ul>Real-time detection of safety gear on people in video</ul>
 
 <ul>Streamlit web app for ease of use</ul>
