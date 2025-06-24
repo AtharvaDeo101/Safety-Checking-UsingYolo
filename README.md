@@ -1,38 +1,34 @@
-🦺 Construction Safety Gear Detection using YOLO & OpenCV
+<h1>🦺 Construction Safety Gear Detection using YOLO & OpenCV</h1>
+<br>
 This project uses YOLO (You Only Look Once) object detection with OpenCV to monitor video streams and detect whether individuals on a construction site are wearing required safety gear such as:
 
-👷 Helmet
+<ul>👷 Helmet</ul>
 
-🦺 Safety Vest
+<ul>🦺 Safety Vest</ul>
 
-👓 Safety Glasses (if included in your model)
+<ul>👓 Safety Glasses </ul>
 
-🔧 Gloves (if included)
 
 A Streamlit-based web interface allows users to upload video files or stream video feeds and view real-time detections.
 
-🚧 Use Case
+##🚧 Use Case
 Ensuring worker safety is crucial at construction sites. This application automates the process of verifying compliance with safety protocols, helping supervisors monitor gear usage and reduce the risk of accidents.
 
-💡 Features
-Real-time detection of safety gear on people in video
+##💡 Features
+<ul>Real-time detection of safety gear on people in video</ul>
 
-Streamlit web app for ease of use
+<ul>Streamlit web app for ease of use</ul>
 
-Option to analyze uploaded video or live stream
+<ul>Option to analyze uploaded video or live stream</ul>
 
-Summary statistics of compliance (optional feature)
+##📦 Tech Stack
+<ul>YOLOv5/YOLOv8 (custom-trained or pre-trained weights)</ul>
 
-Alerts or visual cues when safety gear is missing (optional)
+<ul>OpenCV for video processing</ul>
 
-📦 Tech Stack
-YOLOv5/YOLOv8 (custom-trained or pre-trained weights)
+<ul>Streamlit for the frontend interface</ul>
 
-OpenCV for video processing
-
-Streamlit for the frontend interface
-
-Python (3.7+)
+<ul>Python (3.7+)</ul>
 
 
 
