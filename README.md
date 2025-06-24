@@ -1,18 +1,40 @@
-# Safety Equipment Detection
+🦺 Construction Safety Gear Detection using YOLO & OpenCV
+This project uses YOLO (You Only Look Once) object detection with OpenCV to monitor video streams and detect whether individuals on a construction site are wearing required safety gear such as:
 
-This project implements a real-time safety equipment detection system using the YOLOv8 model to identify whether individuals in a video feed are wearing required safety gear (e.g., hardhats, masks, safety vests). The system consists of a Flask backend for video processing and a Next.js frontend for the user interface.
+👷 Helmet
 
-## Features
-- **Real-Time Detection**: Detects safety equipment in live video streams using a trained YOLOv8 model.
-- **Web Interface**: A Next.js-based UI to start/stop the camera and view the video feed with detection overlays.
-- **Safety Violation Alerts**: Highlights missing safety gear (e.g., "NO-Hardhat") in red and present gear in green.
+🦺 Safety Vest
+
+👓 Safety Glasses (if included in your model)
+
+🔧 Gloves (if included)
+
+A Streamlit-based web interface allows users to upload video files or stream video feeds and view real-time detections.
+
+🚧 Use Case
+Ensuring worker safety is crucial at construction sites. This application automates the process of verifying compliance with safety protocols, helping supervisors monitor gear usage and reduce the risk of accidents.
+
+💡 Features
+Real-time detection of safety gear on people in video
+
+Streamlit web app for ease of use
+
+Option to analyze uploaded video or live stream
+
+Summary statistics of compliance (optional feature)
+
+Alerts or visual cues when safety gear is missing (optional)
+
+📦 Tech Stack
+YOLOv5/YOLOv8 (custom-trained or pre-trained weights)
+
+OpenCV for video processing
+
+Streamlit for the frontend interface
+
+Python (3.7+)
 
 
-## Prerequisites
-- **Python 3.8+**: For the Flask backend.
-- **Node.js 18+**: For the Next.js frontend.
-- **Webcam**: A connected and accessible camera device.
-- **Git**: To clone the repository.
 
 ## Setup Instructions
 
