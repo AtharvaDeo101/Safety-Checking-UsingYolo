@@ -8,7 +8,9 @@ import { Camera, Info, Users, AlertTriangle, TrendingUp, Wifi, WifiOff, Loader2 
 interface DetectionStats {
   total_persons: number
   persons_without_safety_gear: number
+  persons_with_safety_gear: number
   percentage_without_gear: number
+  percentage_with_gear: number
 }
 
 export default function Home() {
@@ -18,7 +20,9 @@ export default function Home() {
   const [stats, setStats] = useState<DetectionStats>({
     total_persons: 0,
     persons_without_safety_gear: 0,
+    persons_with_safety_gear: 0,
     percentage_without_gear: 0,
+    percentage_with_gear: 0,
   })
 
   const checkConnection = async () => {
@@ -126,7 +130,9 @@ export default function Home() {
         setStats({
           total_persons: 0,
           persons_without_safety_gear: 0,
+          persons_with_safety_gear: 0,
           percentage_without_gear: 0,
+          percentage_with_gear: 0,
         })
       }
     } catch (error) {
@@ -144,15 +150,15 @@ export default function Home() {
   }
 
   const getComplianceColor = (percentage: number) => {
-    if (percentage === 0) return "text-green-600"
-    if (percentage < 25) return "text-yellow-600"
+    if (percentage >= 90) return "text-green-600"
+    if (percentage >= 75) return "text-yellow-600"
     return "text-red-600"
   }
 
   const getComplianceStatus = (percentage: number) => {
-    if (percentage === 0) return "Excellent"
-    if (percentage < 10) return "Good"
-    if (percentage < 25) return "Moderate"
+    if (percentage >= 95) return "Excellent"
+    if (percentage >= 85) return "Good"
+    if (percentage >= 70) return "Moderate"
     return "Critical"
   }
 
@@ -226,7 +232,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Persons</CardTitle>
@@ -235,6 +241,17 @@ export default function Home() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.total_persons}</div>
               <p className="text-xs text-muted-foreground">Currently detected</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">With Safety Gear</CardTitle>
+              <Users className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{stats.persons_with_safety_gear}</div>
+              <p className="text-xs text-muted-foreground">Properly equipped</p>
             </CardContent>
           </Card>
 
@@ -251,15 +268,15 @@ export default function Home() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Non-Compliance Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${getComplianceColor(stats.percentage_without_gear)}`}>
-                {stats.percentage_without_gear.toFixed(1)}%
+              <div className={`text-2xl font-bold ${getComplianceColor(stats.percentage_with_gear)}`}>
+                {stats.percentage_with_gear.toFixed(1)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                {getComplianceStatus(stats.percentage_without_gear)} compliance
+                {getComplianceStatus(stats.percentage_with_gear)} compliance
               </p>
             </CardContent>
           </Card>

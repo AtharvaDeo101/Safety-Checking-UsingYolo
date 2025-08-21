@@ -17,7 +17,9 @@ stats_lock = threading.Lock()
 stats = {
     "total_persons": 0,
     "persons_without_safety_gear": 0,
-    "percentage_without_gear": 0.0
+    "persons_with_safety_gear": 0,
+    "percentage_without_gear": 0.0,
+    "percentage_with_gear": 0.0
 }
 
 def generate_frames():
@@ -31,6 +33,7 @@ def generate_frames():
         # Reset counters for each frame
         total_persons = 0
         persons_without_safety_gear = 0
+        persons_with_safety_gear = 0
 
         # Perform YOLO inference
         results = model(frame)
@@ -54,6 +57,8 @@ def generate_frames():
                         total_persons += 1
                     elif class_name.startswith("NO-") or "without" in class_name.lower():
                         persons_without_safety_gear += 1
+                    elif class_name.lower() in ["hardhat", "mask", "safety vest", "safety_vest", "vest"]:
+                        persons_with_safety_gear += 1
                         
                     # Draw bounding box and label
                     color = (0, 255, 0) if not (class_name.startswith("NO-") or "without" in class_name.lower()) else (0, 0, 255)
@@ -65,8 +70,12 @@ def generate_frames():
         with stats_lock:
             stats["total_persons"] = total_persons
             stats["persons_without_safety_gear"] = persons_without_safety_gear
+            stats["persons_with_safety_gear"] = persons_with_safety_gear
             stats["percentage_without_gear"] = (
                 (persons_without_safety_gear / total_persons * 100) if total_persons > 0 else 0.0
+            )
+            stats["percentage_with_gear"] = (
+                (persons_with_safety_gear / total_persons * 100) if total_persons > 0 else 0.0
             )
         
         # Encode frame as JPEG
@@ -109,7 +118,9 @@ def start_camera():
                 with stats_lock:
                     stats["total_persons"] = 0
                     stats["persons_without_safety_gear"] = 0
+                    stats["persons_with_safety_gear"] = 0
                     stats["percentage_without_gear"] = 0.0
+                    stats["percentage_with_gear"] = 0.0
                 return jsonify({"status": "Camera started"}), 200
             else:
                 return jsonify({"status": "Failed to start camera"}), 500
@@ -132,7 +143,9 @@ def stop_camera():
             with stats_lock:
                 stats["total_persons"] = 0
                 stats["persons_without_safety_gear"] = 0
+                stats["persons_with_safety_gear"] = 0
                 stats["percentage_without_gear"] = 0.0
+                stats["percentage_with_gear"] = 0.0
             return jsonify({"status": "Camera stopped"}), 200
         else:
             return jsonify({"status": "Camera not running"}), 200
