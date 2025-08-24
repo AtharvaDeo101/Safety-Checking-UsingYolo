@@ -29,6 +29,8 @@ def generate_frames():
         success, frame = camera.read()
         if not success:
             break
+        
+        frame = cv2.flip(frame, 1)
 
         # Reset counters for each frame
         total_persons = 0
