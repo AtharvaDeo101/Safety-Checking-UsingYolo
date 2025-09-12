@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "src/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "src/components/ui/card"
 import { Camera, Info, Users, AlertTriangle, TrendingUp, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
