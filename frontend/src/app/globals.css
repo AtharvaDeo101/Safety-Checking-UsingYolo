@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 :root {
-  /* Updated color tokens to match safety detection design brief */
   --background: oklch(1 0 0);
   --foreground: oklch(0.35 0 0);
   --card: oklch(0.97 0 0);

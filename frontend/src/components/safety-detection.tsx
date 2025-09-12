@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "src/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
+import { Badge } from "src/components/ui/badge"
+import { Card } from "src/components/ui/card"
 
 interface SafetyDetectionProps {
   confidenceThreshold?: number
