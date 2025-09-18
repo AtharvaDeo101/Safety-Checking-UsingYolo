@@ -35,7 +35,7 @@ export default function Dashboard() {
     if (isRunning) {
       // Fetch stats immediately when camera starts
       fetchStats()
-      // Then fetch every 2 seconds
+
       interval = setInterval(fetchStats, 2000)
     }
     return () => {

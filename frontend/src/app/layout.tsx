@@ -2,7 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import "src/app/globals.css"; // Use @/ alias if tsconfig.json has baseUrl: "src"
+import "src/app/global.css"; // Use @/ alias if tsconfig.json has baseUrl: "src"
 import { ThemeProvider } from "src/components/theme-provider";
 
 export const metadata: Metadata = {
