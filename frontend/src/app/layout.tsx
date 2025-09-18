@@ -2,8 +2,8 @@ import type React from "react";
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import "src/app/global.css"; // Use @/ alias if tsconfig.json has baseUrl: "src"
-import { ThemeProvider } from "src/components/theme-provider";
+import "@/app/global.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "SafetyAI - AI-Powered Safety Detection System",
