@@ -6,7 +6,7 @@ import "@/app/global.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "SafetyAI - AI-Powered Safety Detection System",
+  title: "SafetyAI",
   description: "Real-time safety equipment detection with seamless system integration for workplace compliance",
   generator: "v0.app",
 };
