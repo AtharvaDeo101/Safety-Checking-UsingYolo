@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "src/components/ui/card
 import { Camera, Info, Users, AlertTriangle, TrendingUp, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
+// Backend API URL - deployed on Render
+const API_BASE_URL = "https://safety-checking-usingyolo.onrender.com"
+
 interface DetectionStats {
   total_persons: number
   persons_without_safety_gear: number
@@ -14,6 +17,8 @@ interface DetectionStats {
 
 export default function Dashboard() {
   const [isRunning, setIsRunning] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<DetectionStats>({
     total_persons: 0,
     persons_without_safety_gear: 0,
@@ -22,11 +27,16 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch("http://localhost:5000/get_stats")
+      const response = await fetch(`${API_BASE_URL}/get_stats`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch stats")
+      }
       const result = await response.json()
       setStats(result)
+      setError(null)
     } catch (error) {
       console.error("Error fetching stats:", error)
+      setError("Unable to fetch statistics")
     }
   }
 
@@ -44,24 +54,37 @@ export default function Dashboard() {
   }, [isRunning])
 
   const startCamera = async () => {
+    setIsLoading(true)
+    setError(null)
     try {
-      const response = await fetch("http://localhost:5000/start_camera", {
+      const response = await fetch(`${API_BASE_URL}/start_camera`, {
         method: "POST",
       })
+      if (!response.ok) {
+        throw new Error("Failed to start camera")
+      }
       const result = await response.json()
       if (result.status === "Camera started") {
         setIsRunning(true)
       }
     } catch (error) {
       console.error("Error starting camera:", error)
+      setError("Failed to start camera. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const stopCamera = async () => {
+    setIsLoading(true)
+    setError(null)
     try {
-      const response = await fetch("http://localhost:5000/stop_camera", {
+      const response = await fetch(`${API_BASE_URL}/stop_camera`, {
         method: "POST",
       })
+      if (!response.ok) {
+        throw new Error("Failed to stop camera")
+      }
       const result = await response.json()
       if (result.status === "Camera stopped") {
         setIsRunning(false)
@@ -73,6 +96,9 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error stopping camera:", error)
+      setError("Failed to stop camera. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -99,13 +125,24 @@ export default function Dashboard() {
             </p>
           </div>
 
+          {error && (
+            <Card className="border-red-500">
+              <CardContent className="pt-6">
+                <div className="flex items-center space-x-2 text-red-600">
+                  <AlertTriangle className="h-5 w-5" />
+                  <p>{error}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col space-y-4">
                 <div className="relative aspect-video w-full bg-black rounded-lg overflow-hidden">
                   {isRunning ? (
                     <img
-                      src="http://localhost:5000/video_feed"
+                      src={`${API_BASE_URL}/video_feed`}
                       alt="Video feed"
                       className="w-full h-full object-cover"
                     />
@@ -123,8 +160,9 @@ export default function Dashboard() {
                     size="lg"
                     onClick={isRunning ? stopCamera : startCamera}
                     variant={isRunning ? "destructive" : "default"}
+                    disabled={isLoading}
                   >
-                    {isRunning ? "Stop Camera" : "Start Camera"}
+                    {isLoading ? "Processing..." : isRunning ? "Stop Camera" : "Start Camera"}
                   </Button>
                 </div>
               </div>
