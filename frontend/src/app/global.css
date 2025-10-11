@@ -66,4 +66,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Add global left-alignment for text elements */
+  h1, h2, h3, h4, h5, h6, p, span, div:not(.container) {
+    @apply text-left;
+  }
 }

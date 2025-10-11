@@ -38,18 +38,18 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="py-20 px-4">
-        <div className="container mx-auto text-center max-w-4xl">
+        <div className="container mx-auto max-w-4xl">
           <Badge variant="secondary" className="mb-4">
             AI-Powered Safety Detection
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
             Revolutionizing Safety with <span className="text-primary">Real-Time AI Detection</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl">
             Integrate seamlessly into your existing systems for enhanced compliance and protection. Detect safety
             equipment violations instantly with our end-to-end AI solution.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/dashboard">
               <Button size="lg" className="text-lg px-8">
                 <Play className="mr-2 h-5 w-5" />
@@ -64,9 +64,9 @@ export default function LandingPage() {
       {/* Features Section */}
       <section id="features" className="py-20 px-4 bg-muted/50">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
+          <div className="mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl">
               Advanced AI capabilities designed for industrial safety compliance
             </p>
           </div>
@@ -181,19 +181,19 @@ export default function LandingPage() {
       <section className="py-20 px-4 bg-muted/50">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
+            <div>
               <div className="text-4xl font-bold text-primary mb-2">99.2%</div>
               <div className="text-muted-foreground">Detection Accuracy</div>
             </div>
-            <div className="text-center">
+            <div>
               <div className="text-4xl font-bold text-primary mb-2">&lt;100ms</div>
               <div className="text-muted-foreground">Response Time</div>
             </div>
-            <div className="text-center">
+            <div>
               <div className="text-4xl font-bold text-primary mb-2">24/7</div>
               <div className="text-muted-foreground">Monitoring</div>
             </div>
-            <div className="text-center">
+            <div>
               <div className="text-4xl font-bold text-primary mb-2">500+</div>
               <div className="text-muted-foreground">Deployments</div>
             </div>
@@ -203,13 +203,13 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="py-20 px-4 bg-primary text-primary-foreground">
-        <div className="container mx-auto text-center">
+        <div className="container mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ensure Safety in Real-Time Today!</h2>
-          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+          <p className="text-xl mb-8 opacity-90 max-w-2xl">
             Join hundreds of organizations already using our AI-powered safety detection system to protect their
             workforce and maintain compliance.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Button size="lg" variant="secondary" className="text-lg px-8">
               Request a Demo
             </Button>
@@ -225,7 +225,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="py-12 px-4 bg-muted/30 border-t">
+      <section id="contact" className="py-12 px-4 bg-muted/30 border-t">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -294,11 +294,11 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
+          <div className="border-t mt-8 pt-8 text-sm text-muted-foreground">
             © 2024 SafetyAI. All rights reserved.
           </div>
         </div>
-      </footer>
+      </section>
     </div>
   )
 }
