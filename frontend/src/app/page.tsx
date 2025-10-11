@@ -6,31 +6,32 @@ import { Badge } from "@/components/ui/badge"
 import { Shield, Eye, CheckCircle, BarChart3, ArrowRight, Play, Cpu, Network, Award } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import LiquidEther from "@/components/LiquidEther"
 import heroImage from "@/assets/safety-ai.webp"
-
+import LiquidEther from "@/components/LiquidEther"
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background relative">
       {/* LiquidEther Background */}
-      <LiquidEther
-        colors={['#10b981', '#059669', '#047857']}
-        mouseForce={20}
-        cursorSize={100}
-        isViscous={false}
-        viscous={30}
-        iterationsViscous={32}
-        iterationsPoisson={32}
-        resolution={0.5}
-        isBounce={false}
-        autoDemo={true}
-        autoSpeed={0.5}
-        autoIntensity={2.2}
-        takeoverDuration={0.25}
-        autoResumeDelay={3000}
-        autoRampDuration={0.6}
-      />
+      <div className="absolute inset-0 z-0" style={{ width: '100%', height: '100%' }}>
+        <LiquidEther
+          colors={['#78C841', '#B4E50D', '#EFF5D2']}
+          mouseForce={20}
+          cursorSize={100}
+          isViscous={false}
+          viscous={30}
+          iterationsViscous={32}
+          iterationsPoisson={32}
+          resolution={0.5}
+          isBounce={false}
+          autoDemo={true}
+          autoSpeed={0.5}
+          autoIntensity={2.2}
+          takeoverDuration={0.25}
+          autoResumeDelay={3000}
+          autoRampDuration={0.6}
+        />
+      </div>
 
       {/* Header */}
       <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 relative z-10">
@@ -232,7 +233,7 @@ export default function LandingPage() {
               <div className="text-muted-foreground">Monitoring</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">500+</div>
+              <div className="text-4xl font-bold text-primary mb-2">5+</div>
               <div className="text-muted-foreground">Deployments</div>
             </div>
           </div>
@@ -270,7 +271,6 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <div className="space-y-2 text-sm text-primary-foreground opacity-90">
