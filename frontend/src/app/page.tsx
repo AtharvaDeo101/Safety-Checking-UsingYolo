@@ -1,17 +1,39 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Eye, CheckCircle, BarChart3, ArrowRight, Play, Cpu, Network, Award } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import LiquidEther from "@/components/LiquidEther"
 import heroImage from "@/assets/safety-ai.webp"
 
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* LiquidEther Background */}
+      <LiquidEther
+        colors={['#10b981', '#059669', '#047857']}
+        mouseForce={20}
+        cursorSize={100}
+        isViscous={false}
+        viscous={30}
+        iterationsViscous={32}
+        iterationsPoisson={32}
+        resolution={0.5}
+        isBounce={false}
+        autoDemo={true}
+        autoSpeed={0.5}
+        autoIntensity={2.2}
+        takeoverDuration={0.25}
+        autoResumeDelay={3000}
+        autoRampDuration={0.6}
+      />
+
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 relative z-10">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Shield className="h-8 w-8 text-primary" />
@@ -40,7 +62,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 relative z-10">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
@@ -78,7 +100,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 bg-primary text-primary-foreground">
+      <section id="features" className="py-20 px-4 bg-primary/95 backdrop-blur-sm text-primary-foreground relative z-10">
         <div className="container mx-auto">
           <div className="mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
@@ -87,7 +109,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-background text-foreground">
+            <Card className="bg-background/95 backdrop-blur-sm text-foreground">
               <CardHeader>
                 <Eye className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Real-Time Detection</CardTitle>
@@ -99,7 +121,7 @@ export default function LandingPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-background text-foreground">
+            <Card className="bg-background/95 backdrop-blur-sm text-foreground">
               <CardHeader>
                 <Network className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Seamless Integration</CardTitle>
@@ -111,7 +133,7 @@ export default function LandingPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-background text-foreground">
+            <Card className="bg-background/95 backdrop-blur-sm text-foreground">
               <CardHeader>
                 <Award className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Compliance Assurance</CardTitle>
@@ -128,7 +150,7 @@ export default function LandingPage() {
       </section>
 
       {/* Integration Section */}
-      <section id="integration" className="py-20 px-4">
+      <section id="integration" className="py-20 px-4 relative z-10">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -156,7 +178,7 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            <Card className="p-8">
+            <Card className="p-8 bg-background/95 backdrop-blur-sm">
               <div className="space-y-6">
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div className="flex items-center space-x-3">
@@ -194,7 +216,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-4 bg-muted/50">
+      <section className="py-20 px-4 bg-muted/80 backdrop-blur-sm relative z-10">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -217,10 +239,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-  
-
       {/* Footer */}
-      <section id="contact" className="py-12 px-4 bg-primary text-primary-foreground border-t">
+      <section id="contact" className="py-12 px-4 bg-primary/95 backdrop-blur-sm text-primary-foreground border-t relative z-10">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -248,7 +268,6 @@ export default function LandingPage() {
                     Live Demo
                   </Link>
                 </div>
-
               </div>
             </div>
             
