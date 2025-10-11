@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { Shield, Eye, CheckCircle, BarChart3, ArrowRight, Play, Cpu, Network, Award } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import heroImage from "@/assets/safety-ai.webp"
+
 
 export default function LandingPage() {
   return (
@@ -64,7 +66,7 @@ export default function LandingPage() {
             </div>
             <div className="relative h-full min-h-[400px]">
               <Image
-                src="/assets/ai-in-osh-practices-hero.png"
+                src={heroImage}
                 alt="Safety AI System in Action"
                 fill
                 className="object-cover rounded-lg"
