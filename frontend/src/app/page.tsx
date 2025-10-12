@@ -8,6 +8,8 @@ import Link from "next/link"
 import Image from "next/image"
 import heroImage from "@/assets/safety-ai.webp"
 import LiquidEther from "@/components/LiquidEther"
+  
+
 
 export default function LandingPage() {
   return (
@@ -100,7 +102,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
+{/* Features Section */}
       <section id="features" className="py-20 px-4 bg-primary/95 backdrop-blur-sm text-primary-foreground relative z-10">
         <div className="container mx-auto">
           <div className="mb-16">
@@ -110,45 +112,46 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-background/95 backdrop-blur-sm text-foreground">
-              <CardHeader>
-                <Eye className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Real-Time Detection</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Instantly detect safety equipment like hardhats, masks, and safety vests with 99.2% accuracy using
-                  advanced computer vision.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-background/95 backdrop-blur-sm text-foreground">
-              <CardHeader>
-                <Network className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Seamless Integration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Easy API integration with existing security systems, CCTV networks, and enterprise software through
-                  RESTful APIs.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-background/95 backdrop-blur-sm text-foreground">
-              <CardHeader>
-                <Award className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Compliance Assurance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Meet OSHA, ISO 45001, and industry-specific safety standards with automated reporting and audit
-                  trails.
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="bg-background/95 backdrop-blur-sm text-foreground border-none">
+                <CardHeader>
+                  <Eye className="h-12 w-12 text-primary mb-4" />
+                  <CardTitle>Real-Time Detection</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Instantly detect safety equipment like hardhats, masks, and safety vests with 99.2% accuracy using
+                    advanced computer vision.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-background/95 backdrop-blur-sm text-foreground border-none">
+                <CardHeader>
+                  <Network className="h-12 w-12 text-primary mb-4" />
+                  <CardTitle>Seamless Integration</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Easy API integration with existing security systems, CCTV networks, and enterprise software through
+                    RESTful APIs.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-background/95 backdrop-blur-sm text-foreground border-none">
+                <CardHeader>
+                  <Award className="h-12 w-12 text-primary mb-4" />
+                  <CardTitle>Compliance Assurance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Meet OSHA, ISO 45001, and industry-specific safety standards with automated reporting and audit
+                    trails.
+                  </p>
+                </CardContent>
+              </Card>
           </div>
         </div>
       </section>
+
 
       {/* Integration Section */}
       <section id="integration" className="py-20 px-4 relative z-10">
@@ -160,24 +163,6 @@ export default function LandingPage() {
                 Our safety detection system is designed to integrate seamlessly with your existing infrastructure,
                 providing a complete solution from camera feeds to compliance reporting.
               </p>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                  <span>RESTful API for easy integration</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                  <span>Real-time webhook notifications</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                  <span>Custom dashboard and reporting</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                  <span>Multi-camera support and scaling</span>
-                </div>
-              </div>
             </div>
             <Card className="p-8 bg-background/95 backdrop-blur-sm">
               <div className="space-y-6">
@@ -276,6 +261,7 @@ export default function LandingPage() {
               <div className="space-y-2 text-sm text-primary-foreground opacity-90">
                 <div>atharva20051@gmail.com</div>
                 <div>Pune, India</div>
+                <div>https://github.com/AtharvaDeo101</div>
               </div>
             </div>
           </div>
