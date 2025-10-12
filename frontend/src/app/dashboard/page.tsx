@@ -7,7 +7,7 @@ import { Camera, Info, Users, AlertTriangle, TrendingUp, ArrowLeft } from "lucid
 import Link from "next/link"
 
 // Backend API URL - deployed on Render
-const API_BASE_URL = "https://safety-checking-usingyolo.onrender.com"
+const API_BASE_URL = "http://localhost:5000"
 
 interface DetectionStats {
   total_persons: number
