@@ -17,18 +17,18 @@ Ensuring worker safety is crucial at construction sites. This application automa
 <h2>💡 Features</h2>
 <ul>Real-time detection of safety gear on people in video</ul>
 
-<ul>Streamlit web app for ease of use</ul>
+<ul>React web app for ease of use</ul>
 
-<ul>Option to analyze uploaded video or live stream</ul>
+<ul>Seamless integration to other large applications</ul>
 
 <h2>📦 Tech Stack</h2>
 <ul>YOLOv5/YOLOv8 (custom-trained or pre-trained weights)</ul>
 
 <ul>OpenCV for video processing</ul>
 
-<ul>Streamlit for the frontend interface</ul>
+<ul>React for the frontend interface</ul>
 
-<ul>Python (3.7+)</ul>
+<ul>Python (3.10+)</ul>
 
 
 
@@ -49,7 +49,6 @@ npm run dev
 
 ### Access the App
 - Open your browser and navigate to http://localhost:3000.
-- Click "Start Camera" to begin the video feed with safety equipment detection.
 
 ### Usage
 - Start Camera: Initiates the webcam feed and starts detecting safety gear.
