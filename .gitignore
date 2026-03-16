@@ -1,12 +1,3 @@
 archive/
 node_modules/
 .next/
-
-import heroImage from "@/assets/safety-ai.webp"
- <Image
-                src={heroImage}
-                alt="Safety AI System in Action"
-                fill
-                className="object-cover rounded-lg"
-                priority
-              />
