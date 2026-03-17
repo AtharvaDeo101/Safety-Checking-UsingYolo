@@ -1,3 +1,5 @@
 archive/
 node_modules/
 .next/
+runs/
+models/

@@ -1,0 +1,10 @@
+Admin Login for all the access.
+
+Safety detection -  1. Used Yolo model to identify weather a person is wearing Safety gear or not.
+                    2. It can be used on webcam, phone cam or CCTV cam (install IP Camera app for phone cam)
+                    (use RTSP - real time stream protocol url for ctv cam)
+
+
+
+vehical detection - 1. using Yolo detect the constrution related vehicals(truck,jcb,ect)
+                    2. using Yolo detect vehicals number plate to record vehical entry on construction site (different yolo model was trained on dataset)
