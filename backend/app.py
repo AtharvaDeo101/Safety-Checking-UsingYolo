@@ -1,4 +1,5 @@
 # app.py – Flask backend with GPU‑accelerated YOLO inference
+# Supports: Webcam | Phone Camera (IP Webcam) | CCTV (RTSP)
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 import cv2
@@ -19,24 +20,30 @@ CORS(app,
 
 # ---------- 1. Load model on GPU if available ----------
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"[INFO] Using device: {device}")  # [web:59][web:65]
+print(f"[INFO] Using device: {device}")
 
 model_path = os.path.join(os.path.dirname(__file__), "models", "best.pt")
 if not os.path.exists(model_path):
     raise FileNotFoundError(f"Model not found at {model_path}")
 
 model = YOLO(model_path)
-model.to(device)  # Explicitly move model to GPU/CPU [web:63]
+model.to(device)
 
 # ---------- 2. Global state ----------
 camera = None
 camera_active = False
 stats_lock = threading.Lock()
 
-# Shared frames between threads (no queue – always latest)
-latest_raw_frame = None          # from camera
-latest_processed_frame = None    # with bounding boxes drawn
+latest_raw_frame = None
+latest_processed_frame = None
 frame_lock = threading.Lock()
+
+# ✅ NEW: Camera source config
+camera_source = {
+    "type": "webcam",       # "webcam" | "phone" | "cctv"
+    "phone_url": "",        # e.g. http://192.168.1.5:8080/video
+    "rtsp_url": ""          # e.g. rtsp://admin:pass@192.168.1.10:554/stream
+}
 
 stats = {
     "total_persons": 0,
@@ -47,13 +54,14 @@ stats = {
 }
 
 # ---------- 3. Configuration ----------
-SKIP_FRAMES = 2      # Run YOLO every 3rd frame (adjust for your GPU load)
-JPEG_QUALITY = 85    # Stream quality
-TARGET_FPS = 30      # Cap output stream
-FRAME_W, FRAME_H = 640, 480  # Downscale for faster inference
+SKIP_FRAMES = 2
+JPEG_QUALITY = 85
+TARGET_FPS = 30
+FRAME_W, FRAME_H = 640, 480
 
 # ---------- 4. Helper functions ----------
-def open_camera():
+def open_webcam():
+    """Open local webcam (index 0-2)."""
     is_windows = platform.system() == "Windows"
     for index in [0, 1, 2]:
         cap = cv2.VideoCapture(index, cv2.CAP_DSHOW) if is_windows else cv2.VideoCapture(index)
@@ -61,12 +69,63 @@ def open_camera():
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_W)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_H)
             cap.set(cv2.CAP_PROP_FPS, TARGET_FPS)
-            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Prevent stale frame buildup [web:55]
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             for _ in range(3):
                 cap.read()
+            print(f"[INFO] Webcam opened at index {index}")
             return cap
         cap.release()
     return None
+
+def open_phone_camera(url: str):
+    """
+    Open phone camera via IP Webcam app.
+    URL format: http://<phone_ip>:8080/video
+    The app streams MJPEG, which OpenCV handles natively.
+    """
+    if not url:
+        print("[ERROR] Phone camera URL is empty.")
+        return None
+    cap = cv2.VideoCapture(url)
+    if cap.isOpened():
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        print(f"[INFO] Phone camera opened: {url}")
+        return cap
+    print(f"[ERROR] Could not open phone camera at {url}")
+    return None
+
+def open_cctv_camera(rtsp_url: str):
+    """
+    Open CCTV camera via RTSP stream.
+    URL format: rtsp://<user>:<pass>@<ip>:<port>/<stream_path>
+    Uses FFMPEG backend for reliable RTSP handling.
+    """
+    if not rtsp_url:
+        print("[ERROR] RTSP URL is empty.")
+        return None
+    # CAP_FFMPEG is the most reliable backend for RTSP
+    cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
+    if cap.isOpened():
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        # RTSP-specific: reduce latency by using TCP transport
+        # (some cameras need UDP; switch if TCP fails)
+        print(f"[INFO] CCTV camera opened: {rtsp_url}")
+        return cap
+    print(f"[ERROR] Could not open CCTV at {rtsp_url}")
+    return None
+
+def open_camera():
+    """Route to the correct camera opener based on camera_source['type']."""
+    src_type = camera_source["type"]
+    if src_type == "webcam":
+        return open_webcam()
+    elif src_type == "phone":
+        return open_phone_camera(camera_source["phone_url"])
+    elif src_type == "cctv":
+        return open_cctv_camera(camera_source["rtsp_url"])
+    else:
+        print(f"[ERROR] Unknown camera type: {src_type}")
+        return None
 
 def reset_stats():
     with stats_lock:
@@ -75,13 +134,32 @@ def reset_stats():
 
 # ---------- 5. Threads ----------
 def camera_reader_thread():
-    """Continuously read frames from webcam – never blocked by inference."""
+    """Continuously read frames – handles both local and network cameras."""
     global camera, camera_active, latest_raw_frame
+    consecutive_failures = 0
+    MAX_FAILURES = 30  # Allow brief network hiccups before giving up
+
     while camera_active and camera is not None and camera.isOpened():
         success, frame = camera.read()
         if not success:
-            break
+            consecutive_failures += 1
+            print(f"[WARN] Frame read failed ({consecutive_failures}/{MAX_FAILURES})")
+            if consecutive_failures >= MAX_FAILURES:
+                print("[ERROR] Too many consecutive failures. Stopping camera.")
+                camera_active = False
+                break
+            time.sleep(0.05)
+            continue
+
+        consecutive_failures = 0  # reset on success
+
+        # Flip only for webcam (mirroring makes sense for local cam only)
         frame = cv2.flip(frame, 1)
+
+        # Resize network frames to target resolution for consistent inference
+        if frame.shape[1] != FRAME_W or frame.shape[0] != FRAME_H:
+            frame = cv2.resize(frame, (FRAME_W, FRAME_H))
+
         with frame_lock:
             latest_raw_frame = frame
 
@@ -89,7 +167,7 @@ def inference_thread():
     """Run YOLO inference independently – draws on latest raw frame."""
     global latest_processed_frame, camera_active
     frame_count = 0
-    last_boxes = []  # reuse detections on skipped frames
+    last_boxes = []
 
     while camera_active:
         with frame_lock:
@@ -101,9 +179,7 @@ def inference_thread():
 
         frame_count += 1
 
-        # Run YOLO only every (SKIP_FRAMES+1) frames
         if frame_count % (SKIP_FRAMES + 1) == 0:
-            # ✅ GPU inference happens here – device set on model.load [web:65]
             results = model(frame, imgsz=320, verbose=False, device=device)
             last_boxes = []
 
@@ -140,7 +216,6 @@ def inference_thread():
                 stats["percentage_without_gear"] = (persons_without / max(total_persons, 1)) * 100
                 stats["percentage_with_gear"] = (persons_with / max(total_persons, 1)) * 100
 
-        # Draw last known boxes on EVERY frame → smooth visuals
         annotated = frame.copy()
         for (x1, y1, x2, y2, conf, class_name, is_violation) in last_boxes:
             color = (0, 0, 255) if is_violation else (0, 255, 0)
@@ -148,7 +223,6 @@ def inference_thread():
             cv2.putText(annotated, f"{class_name} {conf:.2f}", (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-        # Encode to JPEG
         encode_params = [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY]
         ret, buffer = cv2.imencode('.jpg', annotated, encode_params)
         if ret:
@@ -168,7 +242,7 @@ def generate_frames():
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-        time.sleep(1 / TARGET_FPS)  # Cap stream rate
+        time.sleep(1 / TARGET_FPS)
 
 # ---------- 6. Routes ----------
 @app.route('/video_feed')
@@ -189,6 +263,47 @@ def video_feed():
 
         return Response(generate_blank(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# ✅ NEW: Set camera source before starting
+@app.route('/set_source', methods=['POST', 'OPTIONS'])
+def set_source():
+    """
+    Set the camera source. Must be called BEFORE /start_camera.
+    Body (JSON):
+      { "type": "webcam" }
+      { "type": "phone",  "phone_url": "http://192.168.1.5:8080/video" }
+      { "type": "cctv",   "rtsp_url":  "rtsp://admin:pass@192.168.1.10:554/stream1" }
+    """
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+
+    if camera_active:
+        return jsonify({
+            "status": "error",
+            "detail": "Stop the camera first before switching source."
+        }), 400
+
+    data = request.get_json(force=True)
+    src_type = data.get("type", "").lower()
+
+    if src_type not in ("webcam", "phone", "cctv"):
+        return jsonify({"status": "error", "detail": "type must be webcam | phone | cctv"}), 400
+
+    camera_source["type"] = src_type
+
+    if src_type == "phone":
+        url = data.get("phone_url", "").strip()
+        if not url:
+            return jsonify({"status": "error", "detail": "phone_url is required for type=phone"}), 400
+        camera_source["phone_url"] = url
+
+    elif src_type == "cctv":
+        url = data.get("rtsp_url", "").strip()
+        if not url:
+            return jsonify({"status": "error", "detail": "rtsp_url is required for type=cctv"}), 400
+        camera_source["rtsp_url"] = url
+
+    return jsonify({"status": "Source updated", "camera_source": camera_source}), 200
+
 @app.route('/start_camera', methods=['POST', 'OPTIONS'])
 def start_camera():
     if request.method == 'OPTIONS':
@@ -202,19 +317,21 @@ def start_camera():
         cam = open_camera()
         if cam is None:
             return jsonify({
-                "status": "Failed to start camera (check webcam connection)",
-                "detail": "cv2.VideoCapture could not open any camera index (0-2)."
+                "status": "error",
+                "detail": f"Could not open {camera_source['type']} camera. Check URL/connection."
             }), 500
 
         camera = cam
         camera_active = True
         reset_stats()
 
-        # Start threads
         threading.Thread(target=camera_reader_thread, daemon=True).start()
         threading.Thread(target=inference_thread, daemon=True).start()
 
-        return jsonify({"status": "Camera started"}), 200
+        return jsonify({
+            "status": "Camera started",
+            "source": camera_source["type"]
+        }), 200
     except Exception as e:
         return jsonify({"status": f"Error starting camera: {str(e)}"}), 500
 
@@ -242,13 +359,20 @@ def get_stats():
     with stats_lock:
         return jsonify(stats.copy())
 
+@app.route('/get_source')
+def get_source():
+    """Return the currently configured camera source."""
+    return jsonify(camera_source)
+
 @app.route('/health')
 def health_check():
-    return jsonify({"status": "Backend running",
-                    "camera_active": camera_active,
-                    "device": device})  # Show whether GPU/CPU is active
+    return jsonify({
+        "status": "Backend running",
+        "camera_active": camera_active,
+        "device": device,
+        "source": camera_source["type"]
+    })
 
 # ---------- 7. Run ----------
 if __name__ == '__main__':
-    # use_reloader=False prevents Flask from spawning a child process that fights for the webcam
     app.run(host='localhost', port=5000, debug=True, threaded=True, use_reloader=False)

@@ -3,10 +3,17 @@
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Camera, Info, Users, AlertTriangle, TrendingUp, ArrowLeft, Wifi, WifiOff } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Camera, Info, Users, AlertTriangle, TrendingUp,
+  ArrowLeft, Wifi, WifiOff, Monitor, Smartphone, Video
+} from "lucide-react"
 import Link from "next/link"
 
 const API_BASE_URL = "http://localhost:5000"
+
+type CameraType = "webcam" | "phone" | "cctv"
 
 interface DetectionStats {
   total_persons: number
@@ -19,13 +26,20 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null)
+
+  // ── Camera source state ──────────────────────────────────────────
+  const [cameraType, setCameraType] = useState<CameraType>("webcam")
+  const [phoneUrl, setPhoneUrl] = useState("http://192.168.1.x:8080/video")
+  const [rtspUrl, setRtspUrl] = useState("rtsp://admin:password@192.168.1.x:554/stream1")
+  const [sourceError, setSourceError] = useState<string | null>(null)
+
   const [stats, setStats] = useState<DetectionStats>({
     total_persons: 0,
     persons_without_safety_gear: 0,
     percentage_without_gear: 0,
   })
 
-  // Fix 1: Check if Flask backend is reachable on mount
+  // ── Health check on mount ────────────────────────────────────────
   useEffect(() => {
     const checkHealth = async () => {
       try {
@@ -33,8 +47,9 @@ export default function Dashboard() {
         if (res.ok) {
           const data = await res.json()
           setBackendOnline(true)
-          // Sync running state with actual backend state on page reload
           setIsRunning(data.camera_active ?? false)
+          // Sync source type shown in UI with actual backend state
+          if (data.source) setCameraType(data.source as CameraType)
         } else {
           setBackendOnline(false)
         }
@@ -45,6 +60,7 @@ export default function Dashboard() {
     checkHealth()
   }, [])
 
+  // ── Stats polling ────────────────────────────────────────────────
   const fetchStats = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/get_stats`)
@@ -63,30 +79,58 @@ export default function Dashboard() {
       fetchStats()
       interval = setInterval(fetchStats, 2000)
     }
-    return () => {
-      if (interval) clearInterval(interval)
-    }
+    return () => { if (interval) clearInterval(interval) }
   }, [isRunning, fetchStats])
 
+  // ── Set source on backend ────────────────────────────────────────
+  const setSource = async (): Promise<boolean> => {
+    setSourceError(null)
+    try {
+      const body: Record<string, string> = { type: cameraType }
+      if (cameraType === "phone") {
+        if (!phoneUrl.trim()) { setSourceError("Phone camera URL is required."); return false }
+        body.phone_url = phoneUrl.trim()
+      }
+      if (cameraType === "cctv") {
+        if (!rtspUrl.trim()) { setSourceError("RTSP URL is required."); return false }
+        body.rtsp_url = rtspUrl.trim()
+      }
+
+      const res = await fetch(`${API_BASE_URL}/set_source`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setSourceError(data?.detail || data?.status || "Failed to set source.")
+        return false
+      }
+      return true
+    } catch {
+      setSourceError("Could not reach backend to set source.")
+      return false
+    }
+  }
+
+  // ── Start camera ─────────────────────────────────────────────────
   const startCamera = async () => {
     setIsLoading(true)
     setError(null)
+
+    // Step 1: push source config to backend first
+    const sourceOk = await setSource()
+    if (!sourceOk) { setIsLoading(false); return }
+
+    // Step 2: start camera
     try {
       const response = await fetch(`${API_BASE_URL}/start_camera`, {
         method: "POST",
-        // Fix 2: Always send Content-Type header on POST requests
         headers: { "Content-Type": "application/json" },
       })
-
-      // Fix 3: Read body BEFORE checking ok, so we can show the real error
       const result = await response.json()
+      if (!response.ok) throw new Error(result?.status || result?.detail || "Failed to start camera")
 
-      if (!response.ok) {
-        // Flask returns {"status": "..."} even on errors — show that message
-        throw new Error(result?.status || result?.detail || "Failed to start camera")
-      }
-
-      // Fix 4: Accept both "Camera started" AND "Camera already running" as success
       const successStatuses = ["Camera started", "Camera already running"]
       if (successStatuses.includes(result.status)) {
         setIsRunning(true)
@@ -95,7 +139,6 @@ export default function Dashboard() {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to start camera"
-      console.error("Error starting camera:", message)
       setError(
         message.includes("fetch")
           ? "Cannot reach backend. Make sure Flask is running on port 5000."
@@ -106,6 +149,7 @@ export default function Dashboard() {
     }
   }
 
+  // ── Stop camera ──────────────────────────────────────────────────
   const stopCamera = async () => {
     setIsLoading(true)
     setError(null)
@@ -114,33 +158,30 @@ export default function Dashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       })
-
       const result = await response.json()
+      if (!response.ok) throw new Error(result?.status || "Failed to stop camera")
 
-      if (!response.ok) {
-        throw new Error(result?.status || "Failed to stop camera")
-      }
-
-      // Fix 5: Accept both "Camera stopped" AND "Camera not running" as success
       const successStatuses = ["Camera stopped", "Camera not running"]
       if (successStatuses.includes(result.status)) {
         setIsRunning(false)
-        setStats({
-          total_persons: 0,
-          persons_without_safety_gear: 0,
-          percentage_without_gear: 0,
-        })
+        setStats({ total_persons: 0, persons_without_safety_gear: 0, percentage_without_gear: 0 })
       } else {
         throw new Error(result.status || "Unexpected response from server")
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to stop camera"
-      console.error("Error stopping camera:", message)
       setError(message)
     } finally {
       setIsLoading(false)
     }
   }
+
+  // ── Source option config ─────────────────────────────────────────
+  const sourceOptions: { type: CameraType; label: string; icon: React.ReactNode; desc: string }[] = [
+    { type: "webcam",  label: "Webcam",       icon: <Monitor className="h-5 w-5" />,    desc: "Local USB / built-in webcam" },
+    { type: "phone",   label: "Phone Camera", icon: <Smartphone className="h-5 w-5" />, desc: "Via IP Webcam app (same Wi-Fi)" },
+    { type: "cctv",    label: "CCTV / NVR",   icon: <Video className="h-5 w-5" />,      desc: "Via RTSP stream URL" },
+  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -152,7 +193,6 @@ export default function Dashboard() {
             <span>Back to Home</span>
           </Link>
           <h1 className="text-xl font-bold">Safety Detection Dashboard</h1>
-          {/* Fix 6: Show backend connectivity status */}
           <div className="flex items-center space-x-2 text-sm">
             {backendOnline === null ? (
               <span className="text-muted-foreground">Checking...</span>
@@ -178,13 +218,13 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* Fix 7: Show actionable error with backend offline hint */}
-          {error && (
+          {/* Error display */}
+          {(error || sourceError) && (
             <Card className="border-red-500">
               <CardContent className="pt-6">
                 <div className="flex items-center space-x-2 text-red-600">
                   <AlertTriangle className="h-5 w-5 shrink-0" />
-                  <p>{error}</p>
+                  <p>{sourceError || error}</p>
                 </div>
                 {!backendOnline && (
                   <p className="text-sm text-muted-foreground mt-2 ml-7">
@@ -195,6 +235,95 @@ export default function Dashboard() {
             </Card>
           )}
 
+          {/* ── Camera Source Selector ── */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Camera Source
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* 3-way toggle */}
+              <div className="grid grid-cols-3 gap-3">
+                {sourceOptions.map(({ type, label, icon, desc }) => (
+                  <button
+                    key={type}
+                    onClick={() => { if (!isRunning) { setCameraType(type); setSourceError(null) } }}
+                    disabled={isRunning}
+                    className={`
+                      flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all text-center
+                      ${cameraType === type
+                        ? "border-green-500 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300"
+                        : "border-muted hover:border-muted-foreground/50 text-muted-foreground"
+                      }
+                      ${isRunning ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                    `}
+                  >
+                    {icon}
+                    <span className="font-semibold text-sm">{label}</span>
+                    <span className="text-xs leading-tight">{desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Phone URL input */}
+              {cameraType === "phone" && (
+                <div className="space-y-2 pt-2">
+                  <Label htmlFor="phone-url" className="flex items-center gap-2">
+                    <Smartphone className="h-4 w-4" />
+                    IP Webcam URL
+                  </Label>
+                  <Input
+                    id="phone-url"
+                    value={phoneUrl}
+                    onChange={(e) => setPhoneUrl(e.target.value)}
+                    placeholder="http://192.168.1.x:8080/video"
+                    disabled={isRunning}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Install <strong>IP Webcam</strong> (Android) or <strong>IP Camera Lite</strong> (iOS).
+                    Open the app → Start server → use the URL shown (e.g.{" "}
+                    <code className="bg-muted px-1 rounded">http://192.168.1.5:8080/video</code>).
+                    Your phone and PC must be on the same Wi-Fi.
+                  </p>
+                </div>
+              )}
+
+              {/* RTSP URL input */}
+              {cameraType === "cctv" && (
+                <div className="space-y-2 pt-2">
+                  <Label htmlFor="rtsp-url" className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    RTSP Stream URL
+                  </Label>
+                  <Input
+                    id="rtsp-url"
+                    value={rtspUrl}
+                    onChange={(e) => setRtspUrl(e.target.value)}
+                    placeholder="rtsp://admin:password@192.168.1.x:554/stream1"
+                    disabled={isRunning}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Format: <code className="bg-muted px-1 rounded">rtsp://username:password@camera_ip:554/stream_path</code>.
+                    Check your camera&apos;s manual for the stream path.
+                    Test in <strong>VLC → Media → Open Network Stream</strong> first.
+                  </p>
+                </div>
+              )}
+
+              {isRunning && (
+                <p className="text-xs text-amber-600 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  Stop the camera to change source.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ── Video Feed ── */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col space-y-4">
@@ -210,6 +339,11 @@ export default function Dashboard() {
                       <div className="flex flex-col items-center space-y-4">
                         <Camera className="h-16 w-16 text-white/50" />
                         <p className="text-white text-lg">Camera is off</p>
+                        <p className="text-white/50 text-sm">
+                          {cameraType === "webcam" && "Local webcam will be used"}
+                          {cameraType === "phone" && `Phone: ${phoneUrl}`}
+                          {cameraType === "cctv" && `CCTV: ${rtspUrl}`}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -219,16 +353,21 @@ export default function Dashboard() {
                     size="lg"
                     onClick={isRunning ? stopCamera : startCamera}
                     variant={isRunning ? "destructive" : "default"}
-                    // Fix 8: Disable button when backend is known to be offline
                     disabled={isLoading || backendOnline === false}
                   >
-                    {isLoading ? "Processing..." : isRunning ? "Stop Camera" : "Start Camera"}
+                    {isLoading
+                      ? "Processing..."
+                      : isRunning
+                        ? "Stop Camera"
+                        : `Start ${sourceOptions.find(s => s.type === cameraType)?.label}`
+                    }
                   </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* ── Stats ── */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -264,6 +403,7 @@ export default function Dashboard() {
             </Card>
           </div>
 
+          {/* ── Legend ── */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
