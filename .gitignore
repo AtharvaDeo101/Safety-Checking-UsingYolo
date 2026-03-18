@@ -3,3 +3,6 @@ node_modules/
 .next/
 runs/
 models/
+models/best.pt
+backend/models/best.pt
+sort/
