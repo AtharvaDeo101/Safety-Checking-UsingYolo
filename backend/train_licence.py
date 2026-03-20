@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from ultralytics import YOLO
-from util import  read_license_plate, write_csv
+from util import read_license_plate, write_csv
 import os
 import signal
 import sys
@@ -30,8 +30,16 @@ except ImportError:
 
 reader = None  # Will be initialized in read_license_plate function when needed
 
-# Video settings
-video_path = r"C:\Users\deoat\Downloads\2103099-uhd_3840_2160_30fps.mp4"
+# ----------------- RTSP SETTINGS -----------------
+# Replace with your RTSP stream URL (include username/password if required)
+# Format: rtsp://[username:password@]host[:port]/path
+rtsp_url = "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov"   # <-- EXAMPLE
+# Optional: Force UDP transport for lower latency (helps with some cameras)
+os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'] = 'rtsp_transport;udp'
+# ------------------------------------------------
+
+# Video settings (now using the RTSP stream)
+video_path = rtsp_url          # <-- USE RTSP URL HERE
 output_csv = './test.csv'
 skip_frames = 2  # Process every 2nd frame (adjust as needed)
 write_interval = 50  # Write results to CSV every 50 processed frames
@@ -39,40 +47,52 @@ write_interval = 50  # Write results to CSV every 50 processed frames
 # Vehicle classes from COCO dataset (car, motorbike, bus, truck)
 vehicles = [2, 3, 5, 7]
 
-# Open video
-cap = cv2.VideoCapture(video_path)
+# Open video stream
+cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)  # Use FFMPEG backend for RTSP
 if not cap.isOpened():
-    raise ValueError(f"Error: Could not open video file {video_path}")
+    raise ValueError(f"Error: Could not open RTSP stream {video_path}")
 
 # Results storage and frame counter
 results = {}
 frame_nmr = -1
 processed_count = 0
 
-print("Starting license plate detection. Press Ctrl+C to stop early.")
+print("Starting license plate detection from RTSP stream. Press Ctrl+C to stop early.")
 
 try:
     while cap.isOpened() and not should_exit:
         ret, frame = cap.read()
         if not ret:
-            print("End of video or cannot read frame")
-            break
-            
+            print("Warning: Frame grab failed – attempting to reconnect...")
+            cap.release()
+            # Simple reconnection loop (you can make this more sophisticated)
+            for _ in range(5):  # Try up to 5 times
+                cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+                if cap.isOpened():
+                    print("Reconnected successfully.")
+                    break
+                print("Reconnection attempt failed, retrying...")
+                cv2.waitKey(1000)  # Wait 1 second before retry
+            else:
+                print("Failed to reconnect after several attempts. Exiting.")
+                break
+            continue
+
         frame_nmr += 1
-        
+
         # Skip frames based on skip_frames setting
         if frame_nmr % skip_frames != 0:
             continue
-            
+
         processed_count += 1
         print(f"Processing frame {frame_nmr} (processed: {processed_count})", end='\r')
-        
+
         # Vehicle detection and tracking using YOLO's built-in tracker
         vehicle_results = coco_model.track(frame, persist=True, classes=vehicles, verbose=False)[0]
-        
+
         # Initialize frame results
         results[frame_nmr] = {}
-        
+
         # Extract vehicle detections with track IDs
         vehicle_detections = []
         if vehicle_results.boxes.id is not None:
@@ -80,46 +100,46 @@ try:
                 # Get box data: x1, y1, x2, y2, confidence, class, track_id
                 x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
                 conf = box.conf[0].cpu().numpy()
-                cls = int (box.cls[0].cpu().numpy())
-                track_id = int (box.id[0].cpu().numpy())
-                
+                cls = int(box.cls[0].cpu().numpy())
+                track_id = int(box.id[0].cpu().numpy())
+
                 if cls in vehicles:
                     vehicle_detections.append([x1, y1, x2, y2, conf, track_id])
-        
+
         # Process each detected vehicle
         for vehicle in vehicle_detections:
             xcar1, ycar1, xcar2, ycar2, score, track_id = vehicle
-            
+
             # Crop vehicle region for license plate detection
             vehicle_crop = frame[int(ycar1):int(ycar2), int(xcar1):int(xcar2), :]
-            
+
             # Skip if crop is invalid
             if vehicle_crop.size == 0:
                 continue
-                
+
             # Detect license plates in vehicle region
             lp_results = license_plate_detector(vehicle_crop, verbose=False)[0]
-            
+
             # Process each license plate detection
             for lp in lp_results.boxes.data.tolist():
                 x1, y1, x2, y2, lp_score, cls_id = lp
-                
+
                 # Adjust coordinates to original frame
                 abs_x1 = int(x1) + int(xcar1)
                 abs_y1 = int(y1) + int(ycar1)
                 abs_x2 = int(x2) + int(xcar1)
                 abs_y2 = int(y2) + int(xcar1)
-                
+
                 # Crop license plate
                 license_plate_crop = frame[abs_y1:abs_y2, abs_x1:abs_x2, :]
-                
+
                 # Skip if crop is invalid
                 if license_plate_crop.size == 0:
                     continue
-                    
+
                 # Process license plate (OCR)
                 license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop)
-                
+
                 if license_plate_text is not None:
                     # Store results
                     results[frame_nmr][track_id] = {
@@ -131,12 +151,12 @@ try:
                             'text_score': license_plate_text_score
                         }
                     }
-        
+
         # Write results periodically to prevent memory buildup
         if processed_count % write_interval == 0:
             write_csv(results, output_csv)
             print(f"\nIntermediate results written to {output_csv}")
-            
+
 except Exception as e:
     print(f"\nError during processing: {str(e)}")
     raise
