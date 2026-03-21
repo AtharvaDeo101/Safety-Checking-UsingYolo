@@ -58,4 +58,4 @@ npm run dev
 - **Green:** Safety equipment present (e.g., Hardhat, Safety Vest).
 - **Red:** Safety equipment missing (e.g., NO-Hardhat, NO-Mask).
 
-- 
+  
