@@ -4,7 +4,6 @@ from ultralytics import YOLO
 from util import read_license_plate, write_csv
 import os
 import signal
-import sys
 import time
 import torch  # for GPU detection
 

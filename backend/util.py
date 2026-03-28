@@ -1,6 +1,5 @@
 import string
 import easyocr
-import cv2
 
 # Initialize the OCR reader (will be created on first use in read_license_plate)
 reader = None
