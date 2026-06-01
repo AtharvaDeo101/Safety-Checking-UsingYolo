@@ -2,11 +2,11 @@
 <br>
 This project uses YOLO (You Only Look Once) object detection with OpenCV to monitor video streams and detect whether individuals on a construction site are wearing required safety gear such as:
 
-<ul>👷 Helmet</ul>
+<ul> Helmet</ul>
 
-<ul>🦺 Safety Vest</ul>
+<ul> Safety Vest</ul>
 
-<ul>👓 Safety Glasses </ul>
+<ul>Safety Glasses </ul>
 
 
 A Streamlit-based web interface allows users to upload video files or stream video feeds and view real-time detections.
