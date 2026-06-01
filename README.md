@@ -1,4 +1,4 @@
-<h1>🦺 Construction Safety Gear Detection using YOLO & OpenCV</h1>
+<h1>Construction Safety Gear Detection using YOLO & OpenCV</h1>
 <br>
 This project uses YOLO (You Only Look Once) object detection with OpenCV to monitor video streams and detect whether individuals on a construction site are wearing required safety gear such as:
 
