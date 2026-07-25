@@ -14,7 +14,7 @@ A Streamlit-based web interface allows users to upload video files or stream vid
 <h2>🚧 Use Case</h2>
 Ensuring worker safety is crucial at construction sites. This application automates the process of verifying compliance with safety protocols, helping supervisors monitor gear usage and reduce the risk of accidents.
 
-<h2>💡 Features</h2>
+<h2> Features</h2>
 <ul>Real-time detection of safety gear on people in video</ul>
 
 <ul>React web app for ease of use</ul>
